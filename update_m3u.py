@@ -13,6 +13,11 @@ SERVER_ADDRESS = settings.XRP_SERVER_WALLET_ADDR
 XRP_WS_URI = settings.XRP_TESTNET_ADDR_WS
 IPFS_GATEWAY_URL = settings.IPFS_GATEWAY_URL
 
+logger.info(SERVER_ADDRESS)
+logger.info(XRP_WS_URI)
+logger.info(IPFS_GATEWAY_URL)
+
+
 ipfs_gateway_root = IPFS_GATEWAY_URL.rstrip('/') + "/ipfs/"
 wisdoms_file_path = "/opt/eaim/radio/wisdoms_ipfs.m3u"
 

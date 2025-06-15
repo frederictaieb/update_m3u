@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
-load_dotenv(dotenv_path=Path(__file__).resolve().parents[2] / '.env')
+load_dotenv(dotenv_path=Path(__file__).resolve().parents[1] / '.env')
 
 class Settings:
     #XRP settings
