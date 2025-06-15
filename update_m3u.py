@@ -2,8 +2,9 @@ import asyncio
 import json
 import logging
 import websockets
-from config import settings
-from your_module import setup_logging, parse_memo  # à adapter selon ton projet
+from lib.config import settings
+from lib.utils import parse_memo  # à adapter selon ton projet
+from lib.logging_config import setup_logging
 
 setup_logging()
 logger = logging.getLogger(__name__)
