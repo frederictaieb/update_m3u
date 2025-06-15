@@ -1,9 +1,15 @@
-import asyncio
+import os
+import uuid
+import tempfile
+import shutil
+import websockets
 import json
 import logging
-import websockets
-from config import settings
-from your_module import setup_logging, parse_memo  # à adapter selon ton projet
+import asyncio
+
+from lib.settings import settings
+from lib.logging_config import setup_logging
+from lib.utils import parse_memo
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -13,8 +19,6 @@ XRP_WS_URI = settings.XRP_TESTNET_ADDR_WS
 IPFS_GATEWAY_URL = settings.IPFS_GATEWAY_URL
 
 ipfs_gateway_root = IPFS_GATEWAY_URL.rstrip('/') + "/ipfs/"
-wisdoms_file_path = "/opt/eaim/radio/wisdoms_ipfs.m3u"
-
 logger.info(f"IPFS Gateway Root: {ipfs_gateway_root}")
 
 async def xrp_wisdom_listener():
@@ -43,30 +47,15 @@ async def xrp_wisdom_listener():
                     parsed_memos = parse_memo(data["transaction"]["Memos"])
                     logger.info(f"📝 Parsed memo: {parsed_memos}")
 
-                    # Lire les lignes déjà existantes dans le fichier
-                    try:
-                        with open(wisdoms_file_path, "r") as f:
-                            existing_cids = set(line.strip() for line in f)
-                    except FileNotFoundError:
-                        existing_cids = set()
+                    with open("/opt/eaim/radio/wisdoms_ipfs.m3u", "a") as f:
+                        for i in range(3):
+                            key = f"wisdom_{i}_hash"
+                            if parsed_memos.get(key):
+                                hash_value = parsed_memos[key]
+                                ipfs_cid = f"{ipfs_gateway_root}{hash_value}"
+                                logger.info(f"*** WISDOM {i} IPFS_CID: {ipfs_cid} ***")
+                                f.write(f"{ipfs_cid}\n")
 
-                    new_cids = []
-
-                    for i in range(3):
-                        key = f"wisdom_{i}_hash"
-                        if parsed_memos.get(key):
-                            hash_value = parsed_memos[key]
-                            ipfs_cid = f"{ipfs_gateway_root}{hash_value}"
-                            if ipfs_cid not in existing_cids:
-                                logger.info(f"*** NEW WISDOM {i} IPFS_CID: {ipfs_cid} ***")
-                                new_cids.append(ipfs_cid)
-                            else:
-                                logger.info(f"⏭️ WISDOM {i} already in file: {ipfs_cid}")
-
-                    if new_cids:
-                        with open(wisdoms_file_path, "a") as f:
-                            for cid in new_cids:
-                                f.write(f"{cid}\n")
 
     except Exception as e:
         logger.error(f"❌ Error in XRP Listener : {e}")
@@ -76,4 +65,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
